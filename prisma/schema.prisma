@@ -1,0 +1,41 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  NIK          String   @unique
+  nama_lengkap String
+  email        String   @unique
+  username     String   @unique
+  password     String
+  forms        Form[]   // Relasi satu ke banyak dengan Form, setiap user dapat mengirim banyak form
+  status       String?  // Status laporan: Menunggu, Proses, Selesai
+}
+
+model Admin {
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  username String @unique
+  password String
+  forms    Form[] // Relasi satu ke banyak dengan Form, Admin mengelola form
+}
+
+model Form {
+  id             Int      @id @default(autoincrement())
+  NIK            String   // NIK yang mengirim form, relasi dengan User
+  tanggal        DateTime
+  pilihan_kendala String
+  deskripsi      String
+  lampiran       String?  // Menyimpan path atau URL lampiran
+  createdAt      DateTime @default(now())
+  status         String   @default("Menunggu") // Status laporan: Menunggu, Proses, Selesai
+  user           User     @relation(fields: [NIK], references: [NIK]) // Relasi dengan User
+  adminId        Int?     // Admin yang mengelola form
+  admin          Admin?   @relation(fields: [adminId], references: [id]) // Relasi opsional dengan Admin
+}
